@@ -12,7 +12,7 @@ repositories that must be cloned separately:
   Forked from [kmolima/mqtt_benchmark](https://github.com/kmolima/mqtt_benchmark)
   (Lima et al., 2025) with extensions for the AUT0 single-broker topology, five broker
   overlays, synthetic payload generation, and TCP packet capture.
-- **[Daavoy/virtualuwsn](https://github.com/Daavoy/virtualuwsn)** — the MQTT
+- **[Daavoy/virtualuwsn-thesis](https://github.com/Daavoy/virtualuwsn-thesis)** — the MQTT
   publisher and subscriber client used during the benchmark runs.
 
 ---
@@ -34,7 +34,7 @@ git clone https://github.com/Daavoy/mqtt_benchmark.git
 cd mqtt_benchmark
 
 # Clone the publisher/subscriber client alongside it
-git clone https://github.com/Daavoy/virtualuwsn.git ../virtualuwsn
+git clone https://github.com/Daavoy/virtualuwsn-thesis.git ../virtualuwsn
 cd ../virtualuwsn
 git submodule update --init --recursive
 cd ../mqtt_benchmark
@@ -43,6 +43,8 @@ cd ../mqtt_benchmark
 docker build -t mqtt_client ../virtualuwsn
 
 # Install Python dependencies for the orchestration scripts
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 
 # Create the required .env file from the example template
