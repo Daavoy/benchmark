@@ -127,6 +127,99 @@ python3 build_16mb_cache.py
 
 ---
 
+## 6. Extending the benchmark
+
+The benchmark is designed to be extended. The key configuration points are described below.
+
+### Adding a new broker
+
+1. **Create a Docker Compose overlay** in `mqtt_benchmark/` named
+   `docker-compose-aut0-<broker>.yml`, following the pattern of the existing five overlays.
+   The overlay must define the `broker` service (image, health check, port 1883) and any
+   broker-specific environment variables.
+
+2. **Register the broker** in `BROKER_CONFIG` at the top of `run_load_updated.py`:
+
+   ```python
+   "mybroker": {
+       "image":            "vendor/mybroker:latest",
+       "overlay":          "docker-compose-aut0-mybroker.yml",
+       "prom_scrape_port": 9090,
+       "prom_scrape_path": "/metrics",
+       "prom_metrics":     ["metric_name_1", "metric_name_2"],
+       "rest_metrics_url": None,
+   },
+   ```
+
+3. **Add the broker to the analysis scripts** by appending its key to the `BROKERS` list
+   at the top of `thesis_analysis.py`, `thesis_stats.py`, `network_thesis.py`, and
+   `network_thesis_firstrun.py`, and adding display name and colour entries to `BL` and `BC`.
+
+### Adding a new payload size
+
+1. **Generate the synthetic payload** in `mqtt_benchmark/`:
+
+   ```bash
+   python3 generate_payload.py --size 512kb
+   ```
+
+   This writes files to `publisher/data/synthetic/512kb/`.
+
+2. **Run the benchmark** for the new size:
+
+   ```bash
+   ./run_broker_comparison.sh 512kb 10
+   ```
+
+3. **Register the size in the analysis scripts** by adding `"512kb"` to the `SIZES` list
+   and `"512kb": "512 KB"` to `SL` at the top of each of the four scripts.
+
+### Changing the number of messages or repetitions
+
+The number of published messages and repetitions are controlled per run:
+
+```bash
+# 5 repetitions instead of 10
+./run_broker_comparison.sh 1kb 5
+
+# Or directly:
+python3 run_load_updated.py --broker mosquitto --payload-size 1kb --numexecs 5
+```
+
+Each repetition sends 4,000 messages total — two providers run simultaneously, each with
+two gateways, and each gateway sends `NR_OF_MESSAGES` messages per repetition
+(currently 1,000). To change the per-repetition count, update **three places**:
+
+```yaml
+# mqtt_benchmark/publisher/configs/data_synthetic_provider1.yml
+NR_OF_MESSAGES: 1000   # change this
+
+# mqtt_benchmark/publisher/configs/data_synthetic_provider2.yml
+NR_OF_MESSAGES: 1000   # and this
+```
+
+```python
+# thesis_analysis.py and thesis_stats.py
+EXPECTED = 40_000   # = NR_OF_MESSAGES × 2 gateways × 2 providers × 10 repetitions
+```
+
+For example, halving to 500 messages per gateway and 5 repetitions gives
+`EXPECTED = 500 × 2 × 2 × 5 = 10_000`.
+
+### Key variables in the analysis scripts
+
+| Variable | File(s) | Purpose |
+|----------|---------|---------|
+| `BROKERS` | all four scripts | ordered list of broker keys to analyse |
+| `SIZES` | all four scripts | ordered list of payload size keys |
+| `BL` | all four scripts | display name per broker key |
+| `BC` | all four scripts | hex colour per broker key |
+| `EXPECTED` | `thesis_analysis.py`, `thesis_stats.py` | expected message count per broker/size |
+| `SUB_LOGS` | `thesis_analysis.py`, `thesis_stats.py` | path to subscriber log directories |
+| `RESULTS` | `thesis_analysis.py`, `network_thesis.py` | path to benchmark results |
+
+---
+
 ## Repository layout
 
 ```
