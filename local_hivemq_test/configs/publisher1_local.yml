@@ -1,0 +1,13 @@
+BROKER_URL: localhost
+BROKER_PORT: 1883
+TOPIC: site1/
+QOS: 0
+NR_OF_MESSAGES: 1000
+PUBLISH_INTERVAL: 1
+TLS_ENABLED: False
+CLEAN_START: True
+RETAIN: False
+REATTEMPTS: 0
+KEEPALIVE: 60
+TESTDATA_PATH: /home/heilo/benchmark/mqtt_benchmark/publisher/data/synthetic/16mb
+CLIENT_ID: provider1
