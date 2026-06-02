@@ -93,6 +93,11 @@ Once benchmark results are available in `mqtt_benchmark/results/`, run from this
 repository's root:
 
 ```bash
+# Install analysis dependencies (first time only)
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
 bash reproduce_thesis.sh
 ```
 
